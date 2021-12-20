@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Huffman.cpp">
+    <ClCompile Include="HuffmanEncode.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HuffmanDecode.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

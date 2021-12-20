@@ -139,7 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Huffman.cpp" />
+    <ClCompile Include="HuffmanEncode.cpp" />
+    <ClCompile Include="HuffmanDecode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="huffman.h" />

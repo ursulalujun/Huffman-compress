@@ -1,3 +1,5 @@
-﻿  Huffman.cpp
-D:\Documents\算法\算法课\压缩文件\Huffman.cpp(319,26): warning C4101: “outValue”: 未引用的局部变量
-  压缩文件.vcxproj -> D:\Documents\算法\算法课\压缩文件\Debug\压缩文件.exe
+﻿  HuffmanDecode.cpp
+D:\Documents\算法\算法课\综合2-压缩文件\HuffmanDecode.cpp(58,26): warning C4101: “outValue”: 未引用的局部变量
+  HuffmanEncode.cpp
+  正在生成代码...
+  压缩文件.vcxproj -> D:\Documents\算法\算法课\综合2-压缩文件\Debug\压缩文件.exe
