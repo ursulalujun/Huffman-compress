@@ -2,48 +2,12 @@
 
 int main()
 {
-    int frequency[27] = { 0 };//记载频率，0对应空格，1-26对应26个字母
-    pNode HuffmanT;
-    createTXT(MAXN);
-    getFrequency(frequency);
-    pNode Huffman[60];
-    //要在main函数中开辟空间存haffman树，在函数里面开的话生存周期只在函数内
-    for (int i = 0;i < 60;i++)
-    {
-        Huffman[i] = (pNode)malloc(sizeof(TreeNode));
-        Huffman[i]->left = NULL;
-        Huffman[i]->right = NULL;
-    }
-    HuffmanT = HuffmanTree(frequency, Huffman);
-    if (!HuffmanT)
-    {
-        cout << "construct tree error" << endl;return 0;
-    }
-    Code codeMap[27];
-    char tempCode[60];
-    for (int i = 0;i < 60;i++)
-        tempCode[i] = 2;
-    for (int i = 0;i < 27;i++)
-    {
-        for (int j = 0;j < 60;j++)
-            codeMap[i].code[j] = 2;
-    }
-    HuffmanCode(HuffmanT, codeMap, tempCode, 0);
-    //输出编码的调试代码
-    /*
-    char t = 'a';
-    for (int i = 0;i < 27;i++)
-    {
-        cout << "\n";
-        if (i)
-            cout << t++ << " ";
-        for (int j = 0;j < 10;j++)
-            cout <<codeMap[i].code[j];
-    }
-    */
-    int lastValidBit=compression(codeMap, frequency);
-    decompression(HuffmanT, lastValidBit);
+    createTXT(MAXN);    
+    compression();
+    decompression();
     //test(HuffmanT);
+    cout << "\n文件的压缩与解压已完成，test文件是原文件，zip.HUF是压缩文件，dezip文件是解压后的文件\n";
+    system("pause");
 }
 
 void createTXT(int num)
@@ -192,7 +156,7 @@ void HuffmanCode(pNode now, Code codemap[27],char tempCode[60], int depth)//深度
     return;
 }
 
-int compression(Code codemap[27], int frequency[])
+void writeZip(Code codeMap[27], int frequency[27])
 {
     FILE* fpIn;
     FILE* fpOut;
@@ -200,7 +164,7 @@ int compression(Code codemap[27], int frequency[])
     char ch;
     unsigned char value;
     int bitIndex = 0;
-    HUF_FILE_HEAD fileHead = {'H', 'U', 'F'};
+    unsigned char fileFormat[4] = "HUF";
 
     fpIn = fopen("test.txt", "rb");
     if (!fpIn)
@@ -208,14 +172,15 @@ int compression(Code codemap[27], int frequency[])
     fpOut = fopen("zip.huf", "wb");
     if (!fpOut)
         cout << "error opening zip file when compressing" << endl;
-    fileHead.lastValidBit = getlastValidBit(codemap, frequency);
+    int lastValidBit = getlastValidBit(codeMap, frequency);
 
     //给文件头部写入元数据
-    fwrite(&fileHead, sizeof(HUF_FILE_HEAD), 1, fpOut);
+    fwrite(&fileFormat, sizeof(unsigned char) * 4, 1, fpOut);
+    fwrite(&lastValidBit, sizeof(int), 1, fpOut);
     //给元数据后写字符种类和频度，解压缩时需要用这些生成一模一样新的哈夫曼树
-    fwrite(frequency, sizeof(frequency), 27, fpOut);
-    //int size = sizeof(HUF_FILE_HEAD);
-    //cout <<" " << size;
+    for (int i = 0;i < 27;i++)
+        fwrite(&frequency[i], sizeof(int), 1, fpOut);
+    cout << " " << ftell(fpOut);
     ch = fgetc(fpIn);
     while (!feof(fpIn)) {
         //把每个字符的哈夫曼编码一个一个过。
@@ -223,20 +188,20 @@ int compression(Code codemap[27], int frequency[])
         //如果是字符'1'，就转换为二进制的1
         int hufCode = 0, i = 0;
         //cout << ch << " ";
-        while(1){
+        while (1) {
             if (ch == 32)
-                hufCode = codemap[0].code[i];
+                hufCode = codeMap[0].code[i];
             else
-                hufCode = codemap[ch - 96].code[i];
+                hufCode = codeMap[ch - 96].code[i];
             //cout << hufCode;
             if (hufCode == 2) break;//跳出内层循环读写一个
-            if (!hufCode) 
+            if (!hufCode)
                 //value为一个字节
                 //从第1位依次赋值，若大于八位（一个字节）了，就写入文件中
-                CLR_BYTE(value, bitIndex);           
-            else 
+                CLR_BYTE(value, bitIndex);
+            else
                 SET_BYTE(value, bitIndex);
-            
+
             bitIndex++;
             if (bitIndex >= 8) {
                 bitIndex = 0;
@@ -256,7 +221,40 @@ int compression(Code codemap[27], int frequency[])
     //if (fileHead.lastValidBit == bitIndex % 8);cout << "  right";
     fclose(fpIn);
     fclose(fpOut);
-    return fileHead.lastValidBit;
+}
+
+
+int compression()
+{
+    int frequency[27] = { 0 };//记载频率，0对应空格，1-26对应26个字母
+    pNode HuffmanT;
+    getFrequency(frequency);
+    pNode Huffman[60];
+    //要在main函数中开辟空间存haffman树，在函数里面开的话生存周期只在函数内
+    for (int i = 0;i < 60;i++)
+    {
+        Huffman[i] = (pNode)malloc(sizeof(TreeNode));
+        Huffman[i]->left = NULL;
+        Huffman[i]->right = NULL;
+    }
+    HuffmanT = HuffmanTree(frequency, Huffman);
+    if (!HuffmanT)
+    {
+        cout << "construct tree error" << endl;return 0;
+    }
+    Code codeMap[27];
+    char tempCode[60];
+    for (int i = 0;i < 60;i++)
+        tempCode[i] = 2;
+    for (int i = 0;i < 27;i++)
+    {
+        for (int j = 0;j < 60;j++)
+            codeMap[i].code[j] = 2;
+    }
+    HuffmanCode(HuffmanT, codeMap, tempCode, 0);
+    writeZip(codeMap, frequency);
+    
+    return 1;
 }
 
 //取最后一个字节的有效位数
